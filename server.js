@@ -237,21 +237,37 @@ app.get('/:username', async (req, res) => {
   if (RESERVED.includes(username.toLowerCase())) return res.status(404).send('Not found');
   try {
     let user, profileData;
+
+    // ── View deduplication via cookie ──
+    // Cookie name: slezzi_v_{username}, expires in 24h
+    const cookieName = `slezzi_v_${username.toLowerCase()}`;
+    const alreadyViewed = req.headers.cookie?.includes(cookieName);
+
     if (useDB) {
       user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
       if (!user) return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-      user.profile.views = (user.profile.views || 0) + 1;
-      user.markModified('profile');
-      await user.save();
+      if (!alreadyViewed) {
+        user.profile.views = (user.profile.views || 0) + 1;
+        user.markModified('profile');
+        await user.save();
+      }
       profileData = { username: user.username, profile: user.profile.toObject ? user.profile.toObject() : user.profile };
     } else {
       const users = readUsersFile();
       const idx = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
       if (idx === -1) return res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-      users[idx].profile.views = (users[idx].profile.views || 0) + 1;
-      writeUsersFile(users);
+      if (!alreadyViewed) {
+        users[idx].profile.views = (users[idx].profile.views || 0) + 1;
+        writeUsersFile(users);
+      }
       profileData = { username: users[idx].username, profile: users[idx].profile };
     }
+
+    // Set cookie for 24h
+    if (!alreadyViewed) {
+      res.setHeader('Set-Cookie', `${cookieName}=1; Path=/; Max-Age=86400; SameSite=Lax`);
+    }
+
     const template = fs.readFileSync(PROFILE_TEMPLATE, 'utf8');
     res.send(template.replace('__PROFILE_DATA__', JSON.stringify(profileData)));
   } catch (e) { console.error(e); res.status(500).send('Fehler'); }
