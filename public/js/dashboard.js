@@ -37,9 +37,10 @@ let isPreviewPlaying = false;
 // Set up profile URL display
 const username = getUsername();
 if (username) {
-  profileUrl = `https://slezzi.bio/${username}`;
+  // Use current host so it works both locally and on render/slezzi.bio
+  profileUrl = `${location.origin}/${username}`;
   const link = document.getElementById('profileUrlLink');
-  if (link) { link.textContent = `slezzi.bio/${username}`; link.href = profileUrl; }
+  if (link) { link.textContent = `${location.host}/${username}`; link.href = profileUrl; }
   const viewLink = document.getElementById('viewProfileLink');
   if (viewLink) { viewLink.href = profileUrl; }
   const usernameEl = document.getElementById('previewUsername');

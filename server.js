@@ -188,6 +188,20 @@ app.put('/api/profile', authMiddleware, (req, res) => {
   res.json(safe);
 });
 
+// GET /api/profiles — public list of all profiles
+app.get('/api/profiles', (req, res) => {
+  const users = readUsers();
+  const profiles = users.map(u => ({
+    username: u.username,
+    displayName: u.profile.displayName,
+    bio: u.profile.bio,
+    avatarUrl: u.profile.avatarUrl,
+    background: u.profile.background,
+    views: u.profile.views || 0
+  }));
+  res.json(profiles);
+});
+
 // Serve dashboard
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));

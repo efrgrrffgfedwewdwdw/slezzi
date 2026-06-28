@@ -516,57 +516,16 @@
   </div>
 </section>
 
-<!-- PROFILE SHOWCASE -->
+<!-- PROFILE SHOWCASE — loaded from API -->
 <section>
   <div class="showcase-wrap">
     <div class="section-center">
-      <div class="section-label">Beispiel Profile</div>
-      <h2 class="section-title">Schön von Anfang an</h2>
-      <p class="section-sub" style="margin:0 auto;">Jedes Profil ist vollständig anpassbar — mit Gradient, Links und Musik.</p>
+      <div class="section-label">Echte Profile</div>
+      <h2 class="section-title">Alle Profile entdecken</h2>
+      <p class="section-sub" style="margin:0 auto;">Jeder kann diese Profile sehen — erstelle deins und erscheine hier.</p>
     </div>
-    <div class="showcase-grid">
-      <div class="showcase-card">
-        <div class="sc-header" style="background:linear-gradient(135deg,#7c6aff,#3b82f6);"></div>
-        <div class="sc-body">
-          <div class="sc-avatar">🦊</div>
-          <div class="sc-name">Alex Rivera</div>
-          <div class="sc-user">@alexrivera</div>
-          <div class="sc-bio">Developer & Designer · Building cool things 🚀</div>
-          <div class="sc-links">
-            <span class="sc-link">💻 GitHub</span>
-            <span class="sc-link">🐦 Twitter</span>
-            <span class="sc-link">🌐 Website</span>
-          </div>
-        </div>
-      </div>
-      <div class="showcase-card">
-        <div class="sc-header" style="background:linear-gradient(135deg,#f43f5e,#f97316);"></div>
-        <div class="sc-body">
-          <div class="sc-avatar">🎨</div>
-          <div class="sc-name">Luna Chen</div>
-          <div class="sc-user">@lunachen</div>
-          <div class="sc-bio">Digital Artist · Illustratorin · Coffee ☕</div>
-          <div class="sc-links">
-            <span class="sc-link">📸 Instagram</span>
-            <span class="sc-link">🎵 TikTok</span>
-            <span class="sc-link">▶️ YouTube</span>
-          </div>
-        </div>
-      </div>
-      <div class="showcase-card">
-        <div class="sc-header" style="background:linear-gradient(135deg,#06b6d4,#10b981);"></div>
-        <div class="sc-body">
-          <div class="sc-avatar">🎮</div>
-          <div class="sc-name">Max Stream</div>
-          <div class="sc-user">@maxstream</div>
-          <div class="sc-bio">Full-time Streamer · Gaming · Just vibing 🎮</div>
-          <div class="sc-links">
-            <span class="sc-link">🟣 Twitch</span>
-            <span class="sc-link">▶️ YouTube</span>
-            <span class="sc-link">🎮 Discord</span>
-          </div>
-        </div>
-      </div>
+    <div class="showcase-grid" id="profilesGrid" style="margin-top:60px;">
+      <div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:40px;">Profile werden geladen...</div>
     </div>
   </div>
 </section>
@@ -626,6 +585,41 @@
       glow.style.left = e.clientX + 'px';
       glow.style.top  = e.clientY + 'px';
     });
+  })();
+
+  // ── Load real profiles from API ──
+  (async function() {
+    try {
+      const res = await fetch('/api/profiles');
+      const profiles = await res.json();
+      const grid = document.getElementById('profilesGrid');
+      if (!profiles.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:40px;">
+          Noch keine Profile — <a href="/register" style="color:#7c6aff;">sei der Erste!</a>
+        </div>`;
+        return;
+      }
+      grid.innerHTML = profiles.map(p => {
+        const bg = p.background ? `linear-gradient(${p.background.direction||'135deg'},${p.background.color1||'#a855f7'},${p.background.color2||'#3b82f6'})` : 'linear-gradient(135deg,#a855f7,#3b82f6)';
+        const avatar = p.avatarUrl
+          ? `<img src="${p.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<span style=font-size:26px>👤</span>'" />`
+          : `<span style="font-size:26px">👤</span>`;
+        return `
+          <a class="showcase-card" href="/${p.username}" style="text-decoration:none;display:block;">
+            <div class="sc-header" style="background:${bg};"></div>
+            <div class="sc-body">
+              <div class="sc-avatar">${avatar}</div>
+              <div class="sc-name">${esc(p.displayName || p.username)}</div>
+              <div class="sc-user">@${esc(p.username)} · ${p.views||0} Aufrufe</div>
+              ${p.bio ? `<div class="sc-bio">${esc(p.bio)}</div>` : ''}
+            </div>
+          </a>`;
+      }).join('');
+    } catch(e) {
+      document.getElementById('profilesGrid').innerHTML =
+        `<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:40px;">Profile konnten nicht geladen werden.</div>`;
+    }
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   })();
 
   // ── Claim username redirect ──
