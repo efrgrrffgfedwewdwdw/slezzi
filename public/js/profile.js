@@ -112,25 +112,47 @@ function renderProfile(data) {
 
   // ── Discord Card ──
   const d = p.discord;
-  if (d&&(d.username||d.inviteUrl)) {
-    const avUrl = d.userId ? `https://cdn.discordapp.com/avatars/${d.userId}/avatar.png` : '';
+  if (d && (d.username || d.inviteUrl)) {
     const dc = document.createElement('div');
     dc.className = 'discord-card';
-    dc.style.animation = 'fadeUp .5s ease .1s both';
+
+    // Default avatar using discriminator or userId mod 5
+    const defaultAvatar = d.userId
+      ? `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(d.userId) % 5n)}.png`
+      : '';
+
     dc.innerHTML = `
       <div class="dc-left">
-        <div class="dc-avatar">
-          ${avUrl?`<img src="${esc(avUrl)}" onerror="this.outerHTML='<span style=font-size:22px>💬</span>'" />`:'<span style="font-size:22px">💬</span>'}
+        <div class="dc-avatar" id="dcAvatarWrap">
+          <img id="dcAvatar" src="${esc(defaultAvatar)}"
+            onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'"
+            style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
           <div class="dc-online"></div>
         </div>
         <div class="dc-info">
-          <div class="dc-name">${esc(d.username||'Discord')}</div>
-          ${d.serverName?`<div class="dc-server">${esc(d.serverName)}</div>`:''}
+          <div class="dc-name">${esc(d.username || 'Discord')}</div>
+          ${d.serverName ? `<div class="dc-server">${esc(d.serverName)}</div>` : ''}
         </div>
       </div>
-      ${d.inviteUrl?`<a class="dc-add" href="${esc(d.inviteUrl)}" target="_blank" rel="noopener">Hinzufügen →</a>`:''}
+      ${d.inviteUrl ? `<a class="dc-add" href="${esc(d.inviteUrl)}" target="_blank" rel="noopener">Hinzufügen →</a>` : ''}
     `;
     wrap.appendChild(dc);
+
+    // Try to load real avatar via Lanyard API (works for users in Lanyard's Discord)
+    if (d.userId) {
+      fetch(`https://api.lanyard.rest/v1/users/${d.userId}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data?.data?.discord_user?.avatar) {
+            const hash = data.data.discord_user.avatar;
+            const ext  = hash.startsWith('a_') ? 'gif' : 'png';
+            const url  = `https://cdn.discordapp.com/avatars/${d.userId}/${hash}.${ext}?size=128`;
+            const img  = document.getElementById('dcAvatar');
+            if (img) img.src = url;
+          }
+        })
+        .catch(() => {});
+    }
   }
 
   // ── Music Card ──
