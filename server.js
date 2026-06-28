@@ -136,12 +136,17 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/me', authMiddleware, async (req, res) => {
   try {
     if (useDB) {
-      const user = await User.findOne({ id: req.userId });
-      if (!user) return res.status(404).json({ error: 'User nicht gefunden' });
+      // Search by custom id field OR by MongoDB _id as fallback
+      let user = await User.findOne({ id: req.userId });
+      if (!user) user = await User.findOne({ _id: req.userId }).catch(() => null);
+      if (!user) {
+        // Token is stale — tell client to re-login
+        return res.status(401).json({ error: 'Session abgelaufen — bitte neu einloggen' });
+      }
       return res.json(safeUser(user));
     } else {
       const user = readUsersFile().find(u => u.id === req.userId);
-      if (!user) return res.status(404).json({ error: 'User nicht gefunden' });
+      if (!user) return res.status(401).json({ error: 'Session abgelaufen — bitte neu einloggen' });
       const { passwordHash, ...safe } = user; return res.json(safe);
     }
   } catch (e) { res.status(500).json({ error: 'Serverfehler' }); }
@@ -167,8 +172,9 @@ app.put('/api/profile', authMiddleware, async (req, res) => {
   const { displayName, bio, avatarUrl, background, links, music, effects, badge, songCover, discord, avatarRing } = req.body;
   try {
     if (useDB) {
-      const user = await User.findOne({ id: req.userId });
-      if (!user) return res.status(404).json({ error: 'User nicht gefunden' });
+      let user = await User.findOne({ id: req.userId });
+      if (!user) user = await User.findOne({ _id: req.userId }).catch(() => null);
+      if (!user) return res.status(401).json({ error: 'Session abgelaufen — bitte neu einloggen' });
       const p = user.profile;
       if (displayName !== undefined) p.displayName = String(displayName).slice(0, 50);
       if (bio !== undefined)         p.bio          = String(bio).slice(0, 150);

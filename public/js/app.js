@@ -28,9 +28,10 @@ async function authFetch(url, options = {}) {
   options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
   const res = await fetch(url, options);
   if (res.status === 401) {
+    // Token abgelaufen oder ungültig — ausloggen und neu einloggen
     localStorage.removeItem('bl_token');
     localStorage.removeItem('bl_username');
-    window.location.href = '/login';
+    window.location.href = '/login?expired=1';
     return null;
   }
   return res;

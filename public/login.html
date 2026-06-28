@@ -42,6 +42,13 @@
     window.location.href = '/dashboard';
   }
 
+  // Show message if session expired
+  if (new URLSearchParams(location.search).get('expired')) {
+    const e = document.getElementById('loginError');
+    e.textContent = 'Sitzung abgelaufen — bitte neu einloggen';
+    e.classList.add('visible');
+  }
+
   const form = document.getElementById('loginForm');
   const errorEl = document.getElementById('loginError');
   const loginBtn = document.getElementById('loginBtn');
