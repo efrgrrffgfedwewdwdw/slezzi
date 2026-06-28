@@ -294,7 +294,7 @@ async function saveProfile() {
   collectAndPreview();
   const saveBtn = document.getElementById('saveBtn');
   saveBtn.disabled = true;
-  saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+  saveBtn.innerHTML = '<span class="spinner"></span> Speichern...';
 
   const payload = {
     displayName: profileState.displayName,
@@ -314,7 +314,7 @@ async function saveProfile() {
     if (!res) return;
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Save failed');
-    showToast('Profile saved! 🎉', 'success');
+    showToast('Profil gespeichert! 🎉', 'success');
     const link = document.getElementById('profileUrlLink');
     if (link) link.style.color = '#4ade80';
     setTimeout(() => { if (link) link.style.color = ''; }, 2000);
@@ -322,7 +322,7 @@ async function saveProfile() {
     showToast(err.message, 'error');
   } finally {
     saveBtn.disabled = false;
-    saveBtn.innerHTML = 'Save changes';
+    saveBtn.innerHTML = 'Änderungen speichern';
   }
 }
 
