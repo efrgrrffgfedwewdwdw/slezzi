@@ -57,7 +57,7 @@ function render(data){
       <div class="m-bottom">
         <div class="m-vol" title="Lautstärke">${I.vol}</div>
         <input type="range" id="volSlider" min="0" max="100" value="80" oninput="setVol(this.value)"
-          style="-webkit-appearance:none;appearance:none;width:72px;height:3px;border-radius:2px;background:rgba(255,255,255,.2);outline:none;cursor:pointer;flex-shrink:0;accent-color:#a855f7;margin:0"/>
+          style="-webkit-appearance:none;appearance:none;width:80px;height:4px;border-radius:2px;background:linear-gradient(to right,#a855f7 80%,rgba(255,255,255,.2) 80%);outline:none;cursor:pointer;flex-shrink:0;margin:0"/>
         <div class="m-prog">
           <div class="m-track" id="mTrack">
             <div class="m-fill" id="mFill"></div>
@@ -80,6 +80,9 @@ function setVol(v){
   const vol=Number(v)/100;
   if(aud)aud.volume=vol;
   if(ytR&&ytP)ytP.setVolume(Number(v));
+  // Update slider fill color dynamically
+  const sl=document.getElementById('volSlider');
+  if(sl)sl.style.background=`linear-gradient(to right,#a855f7 ${v}%,rgba(255,255,255,.2) ${v}%)`;
 }
 
 function ytId(url){if(!url)return null;const ps=[/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/];for(const r of ps){const m=url.match(r);if(m)return m[1];}return null;}
