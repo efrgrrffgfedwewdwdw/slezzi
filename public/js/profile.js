@@ -178,36 +178,85 @@ function renderProfile(data) {
 
 // ── AUDIO ──
 let aud=null, isPlaying=false;
+
 function initAudio(url) {
-  aud = new Audio(url); aud.preload='metadata';
-  aud.addEventListener('loadedmetadata',()=>{ document.getElementById('mDur').textContent=fmt(aud.duration); });
-  aud.addEventListener('timeupdate',()=>{
-    if(!aud.duration) return;
-    const p=aud.currentTime/aud.duration*100;
-    document.getElementById('mFill').style.width=p+'%';
-    document.getElementById('mThumb').style.left=p+'%';
-    document.getElementById('mEl').textContent=fmt(aud.currentTime);
+  aud = new Audio();
+  aud.crossOrigin = 'anonymous';
+  aud.preload = 'metadata';
+  aud.src = url;
+
+  aud.addEventListener('loadedmetadata', () => {
+    const el = document.getElementById('mDur');
+    if (el) el.textContent = fmt(aud.duration);
   });
-  aud.addEventListener('ended',()=>setPlay(false));
+
+  aud.addEventListener('timeupdate', () => {
+    if (!aud.duration) return;
+    const pct = (aud.currentTime / aud.duration) * 100;
+    const fill  = document.getElementById('mFill');
+    const thumb = document.getElementById('mThumb');
+    const el    = document.getElementById('mEl');
+    if (fill)  fill.style.width = pct + '%';
+    if (thumb) thumb.style.left = pct + '%';
+    if (el)    el.textContent = fmt(aud.currentTime);
+  });
+
+  aud.addEventListener('ended', () => setPlay(false));
+
+  // Show error in subtitle if audio fails to load
+  aud.addEventListener('error', () => {
+    const sub = document.getElementById('mSub');
+    if (sub) sub.textContent = 'Audio konnte nicht geladen werden';
+  });
 }
-function togglePlay() { if(!aud) return; isPlaying?aud.pause():aud.play().catch(()=>{}); setPlay(!isPlaying); }
+
+function togglePlay() {
+  if (!aud) return;
+  if (isPlaying) {
+    aud.pause();
+    setPlay(false);
+  } else {
+    const promise = aud.play();
+    if (promise !== undefined) {
+      promise.then(() => {
+        setPlay(true);
+      }).catch(err => {
+        const sub = document.getElementById('mSub');
+        if (sub) sub.textContent = 'Autoplay blockiert — erneut klicken';
+        isPlaying = false;
+      });
+    } else {
+      setPlay(true);
+    }
+  }
+}
+
 function setPlay(v) {
-  isPlaying=v;
-  const btn=document.getElementById('mPlay');
-  const sub=document.getElementById('mSub');
-  const eq=document.getElementById('meq');
-  if(btn) btn.innerHTML=v?SVG.pause:SVG.play;
-  if(sub) sub.textContent=v?'Wird abgespielt':'Pausiert';
-  if(eq) eq.classList.toggle('paused',!v);
+  isPlaying = v;
+  const btn  = document.getElementById('mPlay');
+  const sub  = document.getElementById('mSub');
+  const eq   = document.getElementById('meq');
+  const cov  = document.getElementById('mCover');
+  if (btn) btn.innerHTML = v ? SVG.pause : SVG.play;
+  if (sub) sub.textContent = v ? 'Wird abgespielt' : 'Pausiert';
+  if (eq)  eq.classList.toggle('paused', !v);
+  if (cov) cov.classList.toggle('spin', v);
 }
-function prevT(){ if(aud) aud.currentTime=0; }
-function nextT(){ if(aud&&aud.duration) aud.currentTime=aud.duration; }
+
+function prevT() { if (aud) { aud.currentTime = 0; if (isPlaying) aud.play(); } }
+function nextT() { if (aud && aud.duration) aud.currentTime = aud.duration; }
+
 function seekAudio(e) {
-  if(!aud||!aud.duration) return;
-  const r=document.getElementById('mTrack').getBoundingClientRect();
-  aud.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*aud.duration;
+  if (!aud || !aud.duration) return;
+  const r = document.getElementById('mTrack').getBoundingClientRect();
+  aud.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * aud.duration;
+  if (!isPlaying) { aud.play().then(() => setPlay(true)).catch(() => {}); }
 }
-function fmt(s){ if(!isFinite(s)) return '0:00'; return `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`; }
+
+function fmt(s) {
+  if (!isFinite(s)) return '0:00';
+  return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+}
 
 // ── EFFECTS ENGINE ──
 function initEffect(type, c1, c2) {
