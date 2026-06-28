@@ -59,6 +59,44 @@
     }
     .navbar-links .btn-nav:hover { background: #6d5cf0; color: white; }
 
+    /* logged-in user menu */
+    .nav-user { position: relative; }
+    .nav-user-btn {
+      display: flex; align-items: center; gap: 9px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; padding: 6px 14px 6px 8px; cursor: pointer;
+      color: white; font-size: 13px; font-weight: 600;
+      transition: background .2s;
+    }
+    .nav-user-btn:hover { background: rgba(255,255,255,.1); }
+    .nav-user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg,#7c6aff,#3b82f6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; overflow: hidden; flex-shrink: 0;
+    }
+    .nav-user-avatar img { width:100%; height:100%; object-fit:cover; }
+    .nav-dropdown {
+      position: absolute; top: calc(100% + 10px); right: 0;
+      background: #111118; border: 1px solid rgba(255,255,255,.1);
+      border-radius: 14px; padding: 8px; min-width: 200px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      display: none; flex-direction: column; gap: 2px;
+      z-index: 200;
+    }
+    .nav-dropdown.open { display: flex; }
+    .nav-dd-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      color: rgba(255,255,255,.8); font-size: 13px; font-weight: 500;
+      text-decoration: none; cursor: pointer; border: none; background: transparent;
+      font-family: inherit; width: 100%; transition: background .15s;
+    }
+    .nav-dd-item:hover { background: rgba(255,255,255,.07); color: white; }
+    .nav-dd-item.danger { color: #f87171; }
+    .nav-dd-item.danger:hover { background: rgba(248,113,113,.1); }
+    .nav-dd-sep { height: 1px; background: rgba(255,255,255,.07); margin: 4px 0; }
+
     /* ── HERO ── */
     .hero {
       min-height: 100vh;
@@ -348,9 +386,8 @@
 <!-- NAVBAR -->
 <nav class="navbar">
   <a class="navbar-logo" href="/">Slezzi<span class="dot-bio">.bio</span></a>
-  <div class="navbar-links">
-    <a href="/login">Login</a>
-    <a href="/register" class="btn-nav">Registrieren</a>
+  <div class="navbar-links" id="navLinks">
+    <!-- filled by JS based on login state -->
   </div>
 </nav>
 
@@ -621,6 +658,69 @@
     }
     function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   })();
+
+  // ── Navbar: show login state ──
+  (function() {
+    const token    = localStorage.getItem('bl_token');
+    const username = localStorage.getItem('bl_username');
+    const nav      = document.getElementById('navLinks');
+    if (!nav) return;
+
+    if (token && username) {
+      nav.innerHTML = `
+        <div class="nav-user" id="navUser">
+          <button class="nav-user-btn" onclick="toggleNavMenu()">
+            <div class="nav-user-avatar" id="navAvatar">${username[0].toUpperCase()}</div>
+            <span>${username}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="opacity:.5"><path d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="nav-dropdown" id="navDropdown">
+            <a class="nav-dd-item" href="/dashboard">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+              Dashboard
+            </a>
+            <a class="nav-dd-item" href="/${username}" target="_blank">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+              Mein Profil ansehen
+            </a>
+            <div class="nav-dd-sep"></div>
+            <button class="nav-dd-item danger" onclick="logoutNav()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+              Abmelden
+            </button>
+          </div>
+        </div>`;
+
+      // Load avatar
+      fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(r => r.json()).then(d => {
+          if (d.profile?.avatarUrl) {
+            const av = document.getElementById('navAvatar');
+            if (av) av.innerHTML = `<img src="${d.profile.avatarUrl}" onerror="this.outerHTML='${username[0].toUpperCase()}'" />`;
+          }
+        }).catch(() => {});
+
+      // Close dropdown on outside click
+      document.addEventListener('click', e => {
+        const dd = document.getElementById('navDropdown');
+        const nu = document.getElementById('navUser');
+        if (dd && nu && !nu.contains(e.target)) dd.classList.remove('open');
+      });
+    } else {
+      nav.innerHTML = `
+        <a href="/login" style="color:rgba(255,255,255,.6);font-size:14px;font-weight:500;text-decoration:none;padding:8px 14px;border-radius:10px;transition:.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,.6)'">Login</a>
+        <a href="/register" style="background:#7c6aff;color:white;font-size:14px;font-weight:600;text-decoration:none;padding:9px 20px;border-radius:10px;transition:.2s;" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">Registrieren</a>`;
+    }
+  })();
+
+  function toggleNavMenu() {
+    document.getElementById('navDropdown')?.classList.toggle('open');
+  }
+  function logoutNav() {
+    localStorage.removeItem('bl_token');
+    localStorage.removeItem('bl_username');
+    window.location.reload();
+  }
 
   // ── Claim username redirect ──
   function claimUsername(e) {

@@ -1,83 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In — Slezzi</title>
-  <link rel="stylesheet" href="/css/style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Anmelden — Slezzi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:#080810;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(124,106,255,.2),transparent 70%);pointer-events:none}
+
+    .card{width:100%;max-width:400px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:36px 32px;position:relative;z-index:1}
+
+    .logo{text-align:center;margin-bottom:28px}
+    .logo-icon{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#7c6aff,#3b82f6);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px;font-weight:800;color:white;box-shadow:0 8px 32px rgba(124,106,255,.4)}
+    .logo h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
+    .logo p{font-size:13px;color:rgba(255,255,255,.45);margin-top:4px}
+
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px}
+    .form-group input{width:100%;padding:12px 14px;background:#12121a;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+    .form-group input:focus{border-color:#7c6aff}
+    .form-group input::placeholder{color:rgba(255,255,255,.2)}
+
+    .btn-submit{width:100%;padding:13px;background:linear-gradient(135deg,#7c6aff,#3b82f6);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit;margin-top:8px}
+    .btn-submit:hover{opacity:.9;transform:translateY(-1px)}
+    .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+    .error{color:#f87171;font-size:12px;margin-top:6px;display:none;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);padding:8px 12px;border-radius:8px}
+    .error.show{display:block}
+
+    .footer-link{text-align:center;margin-top:22px;font-size:13px;color:rgba(255,255,255,.35)}
+    .footer-link a{color:#7c6aff;font-weight:600;text-decoration:none}
+    .footer-link a:hover{text-decoration:underline}
+
+    .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
 </head>
 <body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">S</div>
+    <h1>Willkommen zurück</h1>
+    <p>Melde dich an um dein Profil zu bearbeiten</p>
+  </div>
 
-<div class="auth-container">
-  <div class="auth-card">
-    <div class="auth-logo gradient-text">✦ Slezzi</div>
-    <div class="auth-subtitle">Sign in to manage your profile</div>
-
-    <form id="loginForm" novalidate>
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="your_username" autocomplete="username" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
-      </div>
-      <div class="form-error" id="loginError"></div>
-      <button type="submit" class="btn btn-primary" id="loginBtn" style="width:100%; justify-content:center; margin-top:8px;">
-        Sign in
-      </button>
-    </form>
-
-    <div class="auth-footer">
-      Don't have an account? <a href="/register">Create one free</a>
+  <form id="loginForm" novalidate>
+    <div class="form-group">
+      <label>Benutzername</label>
+      <input type="text" id="username" placeholder="deinname" autocomplete="username" required/>
     </div>
+    <div class="form-group">
+      <label>Passwort</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required/>
+    </div>
+
+    <div class="error" id="loginError"></div>
+
+    <button type="submit" class="btn-submit" id="loginBtn">Anmelden</button>
+  </form>
+
+  <div class="footer-link">
+    Noch kein Konto? <a href="/register">Kostenlos registrieren</a>
   </div>
 </div>
 
-<div class="toast-container" id="toastContainer"></div>
 <script src="/js/app.js"></script>
 <script>
-  // Redirect if already logged in
-  if (localStorage.getItem('bl_token')) {
-    window.location.href = '/dashboard';
-  }
+  if (localStorage.getItem('bl_token')) window.location.href = '/dashboard';
 
-  // Show message if session expired
   if (new URLSearchParams(location.search).get('expired')) {
     const e = document.getElementById('loginError');
-    e.textContent = 'Sitzung abgelaufen — bitte neu einloggen';
-    e.classList.add('visible');
+    e.textContent = 'Sitzung abgelaufen — bitte neu anmelden';
+    e.classList.add('show');
   }
 
-  const form = document.getElementById('loginForm');
-  const errorEl = document.getElementById('loginError');
-  const loginBtn = document.getElementById('loginBtn');
-
-  form.addEventListener('submit', async (e) => {
+  document.getElementById('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
-    errorEl.classList.remove('visible');
-    loginBtn.disabled = true;
-    loginBtn.innerHTML = '<span class="spinner"></span> Signing in...';
+    const err = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    err.classList.remove('show');
 
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
 
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Anmelden...';
+
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
+      const res  = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password }) });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Login failed');
+      if (!res.ok) throw new Error(data.error || 'Anmeldung fehlgeschlagen');
       localStorage.setItem('bl_token', data.token);
       localStorage.setItem('bl_username', data.username);
       window.location.href = '/dashboard';
-    } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.classList.add('visible');
-      loginBtn.disabled = false;
-      loginBtn.innerHTML = 'Sign in';
+    } catch (ex) {
+      err.textContent = ex.message;
+      err.classList.add('show');
+      btn.disabled = false;
+      btn.innerHTML = 'Anmelden';
     }
   });
 </script>
