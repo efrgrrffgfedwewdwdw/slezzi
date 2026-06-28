@@ -63,6 +63,9 @@
     <div class="form-group">
       <label>Benutzername</label>
       <input type="text" id="username" placeholder="deinname" autocomplete="username" required maxlength="20"/>
+      <div style="font-size:12px;color:rgba(255,255,255,.3);margin-top:6px;">
+        Deine URL: <span id="urlPreview" style="color:#7c6aff;font-weight:600;">slezzi.bio/deinname</span>
+      </div>
     </div>
     <div class="form-group">
       <label>Passwort</label>
@@ -72,15 +75,6 @@
       <label>E-Mail</label>
       <input type="email" id="email" placeholder="du@beispiel.de" autocomplete="email" required/>
     </div>
-    <div class="form-group">
-      <label>Bio-URL</label>
-      <div class="url-row">
-        <span class="url-prefix">slezzi.bio/</span>
-        <input type="text" id="urlInput" placeholder="deinname" maxlength="20" tabindex="-1" style="pointer-events:none;opacity:.6;"/>
-      </div>
-      <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:5px;">Wird automatisch aus dem Benutzernamen generiert</div>
-    </div>
-
     <div class="terms">
       <input type="checkbox" id="terms"/>
       <label for="terms">Ich habe die <a href="#">Nutzungsbedingungen</a> gelesen und stimme ihnen zu.</label>
@@ -105,10 +99,16 @@
 
   // Pre-fill from URL param
   const pre = new URLSearchParams(location.search).get('username');
-  if (pre) { usernameInput.value = pre; urlInput.value = pre; }
+  if (pre) {
+    usernameInput.value = pre;
+    const prev = document.getElementById('urlPreview');
+    if (prev) prev.textContent = `slezzi.bio/${pre}`;
+  }
 
   usernameInput.addEventListener('input', () => {
-    urlInput.value = usernameInput.value.trim() || '';
+    const val = usernameInput.value.trim() || 'deinname';
+    const prev = document.getElementById('urlPreview');
+    if (prev) prev.textContent = `slezzi.bio/${val}`;
   });
 
   document.getElementById('registerForm').addEventListener('submit', async e => {
