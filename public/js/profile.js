@@ -17,146 +17,44 @@ function initCursor(){const g=document.getElementById('cursor-glow');if(!g)retur
 
 function renderProfile(data){
   const{username,profile:p}=data;
-  document.title=`${p.displayName||username} — Slezzi.bio`;
-  const c1=p.background?.color1||'#ec4899',c2=p.background?.color2||'#a855f7',dir=p.background?.direction||'135deg';
-  const coverUrl=p.songCover||'';
+  document.title=`${p.displayName||username} � Slezzi.bio`;
+  const c1=p.background?.color1||'#a855f7',c2=p.background?.color2||'#3b82f6',dir=p.background?.direction||'135deg';
+  const coverUrl=p.songCover||'',bgImgUrl=p.background?.imageUrl||'';
   const bgEl=document.getElementById('bg');
-  if(bgEl){if(coverUrl){bgEl.style.backgroundImage=`url(${esc(coverUrl)})`;bgEl.style.background='';}else{bgEl.style.background=`linear-gradient(${dir},${c1},${c2})`;bgEl.style.backgroundImage='';}}
+  if(bgEl){if(coverUrl){bgEl.style.backgroundImage=`url(${esc(coverUrl)})`;bgEl.style.background='';}else if(bgImgUrl){bgEl.style.backgroundImage=`url(${esc(bgImgUrl)})`;bgEl.style.background='';}else{bgEl.style.background=`linear-gradient(${dir},${c1},${c2})`;bgEl.style.backgroundImage='';}}
   initEffect(p.effects||'particles',c1,c2);
   const lc=document.getElementById('left-col');
-  if(!lc){console.error('left-col not found');return;}
-
-  // ── Big Avatar + Animated Name Layout (guns.lol style) ──
-  const ring=p.avatarRing||'ring-gradient';
-  const badge=p.badge||'';
-  const avHtml=p.avatarUrl
-    ?`<img src="${esc(p.avatarUrl)}" alt="avatar" onerror="this.outerHTML='<span style=font-size:60px>👤</span>'"/>`
-    :`<span style="font-size:60px">👤</span>`;
-
-  // Big avatar at top
-  const bigAv=document.createElement('div');
-  bigAv.className='big-avatar-wrap';
-  bigAv.innerHTML=`<div class="big-avatar-ring ${esc(ring)}"><div class="big-avatar-inner">${avHtml}</div></div>`;
-  lc.appendChild(bigAv);
-
-  // Animated name + username + bio
-  const nameEl=document.createElement('div');
-  nameEl.className='profile-name-block';
-  const badgeHtml=badge?`<span class="badge badge-${esc(badge)}">${badge==='verified'?'✓ Verified':badge==='premium'?'★ Premium':'🎨 Creator'}</span>`:'';
-  nameEl.innerHTML=`
-    <div class="anim-name">${esc(p.displayName||username)}</div>
-    ${badgeHtml}
-    ${p.bio?`<div class="profile-bio-center">${esc(p.bio)}</div>`:''}
-  `;
-  lc.appendChild(nameEl);
-
-  // Social icons row (centered)
+  if(!lc)return;
+  const ring=p.avatarRing||'ring-gradient',badge=p.badge||'';
+  const avHtml=p.avatarUrl?`<img src="${esc(p.avatarUrl)}" alt="avatar" onerror="this.outerHTML='<span style=font-size:38px>??</span>'"/>`:`<span style="font-size:38px">??</span>`;
+  const badgeHtml=badge?`<div class="badge badge-${esc(badge)}" style="position:absolute;top:12px;right:14px;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;backdrop-filter:blur(10px);letter-spacing:.5px;">${badge==='verified'?'? Verifiziert':badge==='premium'?'? Premium':'?? Creator'}</div>`:'';
+  const headerBg=bgImgUrl?`background:url(${esc(bgImgUrl)}) center/cover`:`background:linear-gradient(${dir},${c1},${c2})`;
   const iconLinks=(p.links||[]).filter(l=>l.url&&ICON_PLATFORMS.has(l.platform));
   const fullLinks=(p.links||[]).filter(l=>l.url&&!ICON_PLATFORMS.has(l.platform));
-  if(iconLinks.length){
-    const sr=document.createElement('div');sr.className='social-row-center';
-    iconLinks.forEach(l=>{const a=document.createElement('a');a.className='social-btn';a.href=esc(l.url);a.target='_blank';a.rel='noopener noreferrer';a.title=esc(l.label||l.platform);a.innerHTML=SVG[l.platform]||SVG.link;sr.appendChild(a);});
-    lc.appendChild(sr);
-  }
-  if(fullLinks.length){
-    const lb=document.createElement('div');lb.className='link-btns-col';
-    fullLinks.forEach(l=>{const a=document.createElement('a');a.className='link-btn';a.href=esc(l.url);a.target='_blank';a.rel='noopener noreferrer';a.innerHTML=`${SVG[l.platform]||SVG.link}<span class="link-btn-label">${esc(l.label||l.url)}</span><span class="link-btn-arrow">${SVG.arrow}</span>`;lb.appendChild(a);});
-    lc.appendChild(lb);
-  }
-
-  // Views counter
-  const viewsEl=document.createElement('div');
-  viewsEl.className='views-center';
-  viewsEl.innerHTML=`${SVG.eye} ${p.views||0}`;
-  lc.appendChild(viewsEl);
-
-  // Discord (Lanyard-style with activity)
+  const iconHtml=iconLinks.map(l=>`<a class="icon-btn" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" title="${esc(l.label||l.platform)}">${SVG[l.platform]||SVG.link}</a>`).join('');
+  const fullHtml=fullLinks.map(l=>`<a class="link-btn" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${SVG[l.platform]||SVG.link}<span class="link-btn-label">${esc(l.label||l.url)}</span><span class="link-btn-arrow">${SVG.arrow}</span></a>`).join('');
+  const card=document.createElement('div');card.className='profile-card';
+  card.innerHTML=`<div class="card-header" style="${headerBg}"><div class="views-pill">${SVG.eye} ${p.views||0}</div>${badgeHtml}<div class="avatar-wrap"><div class="avatar-ring ${esc(ring)}"><div class="avatar-inner">${avHtml}</div></div></div></div><div class="card-body"><div class="display-name">${esc(p.displayName||username)}</div><div class="username-tag">@${esc(username)}</div>${p.bio?`<div class="bio">${esc(p.bio)}</div>`:''}${iconHtml?`<div class="icon-links">${iconHtml}</div>`:''}${fullHtml?`<div class="link-btns">${fullHtml}</div>`:''}</div>`;
+  lc.appendChild(card);
   const d=p.discord;
   if(d&&(d.username||d.inviteUrl)){
     const pill=document.createElement('div');pill.className='discord-pill';
-    const defAv=d.userId
-      ? `https://cdn.discordapp.com/embed/avatars/${(parseInt(d.userId,10)||0) % 5}.png`
-      : 'https://cdn.discordapp.com/embed/avatars/0.png';
-    pill.innerHTML=`
-      <div class="dc-avatar">
-        <img id="dcAvatar" src="${esc(defAv)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
-        <div class="dc-online"></div>
-      </div>
-      <div class="dc-info">
-        <div class="dc-name">${esc(d.username||'Discord')}</div>
-        ${d.serverName?`<div class="dc-server">${esc(d.serverName)}</div>`:''}
-      </div>
-      ${d.inviteUrl?`<a class="dc-add" href="${esc(d.inviteUrl)}" target="_blank" rel="noopener">Hinzufügen →</a>`:''}
-    `;
+    const defAv=d.userId?`https://cdn.discordapp.com/embed/avatars/${(parseInt(d.userId,10)||0)%5}.png`:'https://cdn.discordapp.com/embed/avatars/0.png';
+    pill.innerHTML=`<div class="dc-avatar"><img id="dcAvatar" src="${esc(defAv)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/><div class="dc-online"></div></div><div class="dc-info"><div class="dc-name">${esc(d.username||'Discord')}</div>${d.serverName?`<div class="dc-server">${esc(d.serverName)}</div>`:''}</div>${d.inviteUrl?`<a class="dc-add" href="${esc(d.inviteUrl)}" target="_blank" rel="noopener">Hinzuf�gen ?</a>`:''}`;
     lc.appendChild(pill);
-    // Lanyard avatar + activity
-    if(d.userId){
-      fetch(`https://api.lanyard.rest/v1/users/${d.userId}`)
-        .then(r=>r.json()).then(data=>{
-          const u=data?.data;
-          if(u?.discord_user?.avatar){
-            const h=u.discord_user.avatar,ext=h.startsWith('a_')?'gif':'png';
-            const img=document.getElementById('dcAvatar');
-            if(img)img.src=`https://cdn.discordapp.com/avatars/${d.userId}/${h}.${ext}?size=128`;
-          }
-          if(u?.activities?.length){
-            const act=u.activities.find(a=>a.type===0)||u.activities[0];
-            if(act){
-              const srv=pill.querySelector('.dc-server');
-              if(srv)srv.textContent=`${act.type===0?'Playing':'':''}  ${act.name}`;
-            }
-          }
-        }).catch(()=>{});
-    }
+    if(d.userId){fetch(`https://api.lanyard.rest/v1/users/${d.userId}`).then(r=>r.json()).then(data=>{if(data?.data?.discord_user?.avatar){const h=data.data.discord_user.avatar,ext=h.startsWith('a_')?'gif':'png',img=document.getElementById('dcAvatar');if(img)img.src=`https://cdn.discordapp.com/avatars/${d.userId}/${h}.${ext}?size=128`;}}).catch(()=>{});}
   }
-
-  // Music bar (with loop ON by default + volume slider)
   if(p.music?.title||p.music?.url){
     const bar=document.createElement('div');bar.className='music-bar';
-    const ti=coverUrl
-      ?`<img src="${esc(coverUrl)}" onerror="this.style.display='none'"/><div class="music-eq paused" id="meq"><span></span><span></span><span></span></div>`
-      :`${SVG.music}<div class="music-eq paused" id="meq"><span></span><span></span><span></span></div>`;
-    bar.innerHTML=`
-      <div class="music-bar-top">
-        <div class="music-thumb" id="mCover">${ti}</div>
-        <div class="music-meta">
-          <div class="music-title">${esc(p.music.title||'Unknown Track')}</div>
-          <div class="music-status" id="mSub">Klicke Play</div>
-        </div>
-        <div class="music-controls">
-          <button class="m-btn" onclick="prevT()">${SVG.prev}</button>
-          <button class="m-btn play" id="mPlay" onclick="togglePlay()">${SVG.play}</button>
-          <button class="m-btn" onclick="nextT()">${SVG.next}</button>
-        </div>
-      </div>
-      <div class="music-bar-bottom">
-        <div class="vol-icon-bar" onclick="toggleMute()" title="Mute">${SVG.vol}</div>
-        <input type="range" id="volSlider" min="0" max="100" value="80" oninput="setVolume(this.value)"
-          style="-webkit-appearance:none;appearance:none;width:70px;height:3px;border-radius:2px;background:rgba(255,255,255,.2);outline:none;cursor:pointer;flex-shrink:0;accent-color:#ec4899"/>
-        <div class="prog-wrap">
-          <div class="prog-track" id="mTrack">
-            <div class="prog-fill" id="mFill"></div>
-            <div class="prog-thumb" id="mThumb"></div>
-          </div>
-          <div class="prog-times"><span id="mEl">0:00</span><span id="mDur">0:00</span></div>
-        </div>
-        <button id="loopBtn" onclick="toggleLoop()" title="Dauerschleife AN"
-          style="width:28px;height:28px;border-radius:8px;border:1px solid rgba(236,72,153,.5);background:rgba(236,72,153,.1);color:#ec4899;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
-        </button>
-      </div>
-    `;
+    const ti=coverUrl?`<img src="${esc(coverUrl)}" onerror="this.style.display='none'"/><div class="music-eq paused" id="meq"><span></span><span></span><span></span></div>`:`${SVG.music}<div class="music-eq paused" id="meq"><span></span><span></span><span></span></div>`;
+    bar.innerHTML=`<div class="music-bar-top"><div class="music-thumb" id="mCover">${ti}</div><div class="music-meta"><div class="music-title">${esc(p.music.title||'Unknown Track')}</div><div class="music-status" id="mSub">Klicke Play</div></div><div class="music-controls"><button class="m-btn" onclick="prevT()">${SVG.prev}</button><button class="m-btn play" id="mPlay" onclick="togglePlay()">${SVG.play}</button><button class="m-btn" onclick="nextT()">${SVG.next}</button></div></div><div class="music-bar-bottom"><div class="vol-icon-bar" onclick="toggleMute()" title="Mute">${SVG.vol}</div><input type="range" id="volSlider" min="0" max="100" value="80" oninput="setVolume(this.value)" style="-webkit-appearance:none;appearance:none;width:70px;height:3px;border-radius:2px;background:rgba(255,255,255,.2);outline:none;cursor:pointer;flex-shrink:0;accent-color:#a855f7"/><div class="prog-wrap"><div class="prog-track" id="mTrack"><div class="prog-fill" id="mFill"></div><div class="prog-thumb" id="mThumb"></div></div><div class="prog-times"><span id="mEl">0:00</span><span id="mDur">0:00</span></div></div><button id="loopBtn" onclick="toggleLoop()" title="Dauerschleife AN" style="width:28px;height:28px;border-radius:8px;border:1px solid rgba(168,85,247,.5);background:rgba(168,85,247,.1);color:#a855f7;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg></button></div>`;
     lc.appendChild(bar);
     if(p.music.url)initAudio(p.music.url);
     document.getElementById('mTrack').addEventListener('click',seekAudio);
   }
-
-  const ft=document.createElement('div');ft.className='slezzi-footer';
-  ft.innerHTML=`Powered by <a href="/">✦ Slezzi.bio</a> &nbsp;·&nbsp; <a href="/register">Erstelle dein Profil →</a>`;
-  lc.appendChild(ft);
+  const ft=document.createElement('div');ft.className='slezzi-footer';ft.innerHTML=`Powered by <a href="/">? Slezzi.bio</a> &nbsp;�&nbsp; <a href="/register">Erstelle dein Profil ?</a>`;lc.appendChild(ft);
   initLyrics(p.music);
 }
-
 // Lyrics
 let lyricsLines=[],lyricsTimer=null,lyricsIndex=0;
 function initLyrics(music){
