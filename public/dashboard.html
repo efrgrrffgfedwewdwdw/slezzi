@@ -68,6 +68,47 @@
         <option value="225deg">↙ Diagonal umgekehrt</option>
       </select>
     </div>
+    <div class="form-group">
+      <label>Hintergrundbild URL <span class="input-hint-inline">(überschreibt Gradient)</span></label>
+      <input type="url" id="bgImageUrl" placeholder="https://example.com/hintergrund.jpg" />
+    </div>
+    <div class="form-group">
+      <label>Hintergrundbild Blur <span id="bgBlurVal">0</span></label>
+      <input type="range" id="bgBlur" min="0" max="20" value="0" style="width:100%;accent-color:#7c6aff;margin-top:6px" />
+    </div>
+
+    <div class="section-header">Profil Effekte</div>
+    <div class="form-group">
+      <label>Hintergrund-Effekt</label>
+      <select id="profileEffect">
+        <option value="particles">✨ Partikel (Standard)</option>
+        <option value="snow">❄️ Schnee</option>
+        <option value="rain">🌧️ Regen</option>
+        <option value="stars">⭐ Sterne</option>
+        <option value="confetti">🎉 Konfetti</option>
+        <option value="bubbles">🫧 Blasen</option>
+        <option value="none">— Kein Effekt</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Avatar-Ring Stil</label>
+      <select id="avatarRing">
+        <option value="ring-gradient">🌈 Gradient (Standard)</option>
+        <option value="ring-spin">🔄 Drehend</option>
+        <option value="ring-pulse">💓 Pulsierend</option>
+        <option value="ring-rainbow">🌈 Regenbogen animiert</option>
+        <option value="ring-white">⚪ Weiß</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Profil-Badge</label>
+      <select id="profileBadge">
+        <option value="">— Kein Badge</option>
+        <option value="verified">✓ Verifiziert</option>
+        <option value="premium">★ Premium</option>
+        <option value="creator">🎨 Creator</option>
+      </select>
+    </div>
 
     <div class="section-header">Soziale Links</div>
     <div class="links-list" id="linksList"></div>
@@ -77,6 +118,10 @@
     <div class="form-group">
       <label>Titel</label>
       <input type="text" id="musicTitle" placeholder="Mein Lieblingssong" maxlength="100" />
+    </div>
+    <div class="form-group">
+      <label>Song Cover URL <span class="input-hint-inline">(Albumcover-Bild)</span></label>
+      <input type="url" id="songCover" placeholder="https://example.com/cover.jpg" />
     </div>
     <div class="form-group">
       <label>Audio URL <span class="input-hint-inline">(.mp3 direkter Link)</span></label>

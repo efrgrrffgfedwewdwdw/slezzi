@@ -142,24 +142,24 @@ app.put('/api/profile', authMiddleware, (req, res) => {
   const idx = users.findIndex(u => u.id === req.userId);
   if (idx === -1) return res.status(404).json({ error: 'User not found' });
 
-  const { displayName, bio, avatarUrl, background, links, music } = req.body;
+  const { displayName, bio, avatarUrl, background, links, music, effects, badge, songCover } = req.body;
 
-  if (displayName !== undefined) {
-    users[idx].profile.displayName = String(displayName).slice(0, 50);
-  }
-  if (bio !== undefined) {
-    users[idx].profile.bio = String(bio).slice(0, 150);
-  }
-  if (avatarUrl !== undefined) {
-    users[idx].profile.avatarUrl = String(avatarUrl).slice(0, 500);
-  }
+  if (displayName !== undefined) users[idx].profile.displayName = String(displayName).slice(0, 50);
+  if (bio !== undefined) users[idx].profile.bio = String(bio).slice(0, 150);
+  if (avatarUrl !== undefined) users[idx].profile.avatarUrl = String(avatarUrl).slice(0, 500);
+  if (songCover !== undefined) users[idx].profile.songCover = String(songCover).slice(0, 500);
+  if (badge !== undefined) users[idx].profile.badge = String(badge).slice(0, 20);
+  if (req.body.avatarRing !== undefined) users[idx].profile.avatarRing = String(req.body.avatarRing).slice(0, 30);
   if (background !== undefined) {
     users[idx].profile.background = {
       color1: background.color1 || '#a855f7',
       color2: background.color2 || '#3b82f6',
-      direction: background.direction || '135deg'
+      direction: background.direction || '135deg',
+      imageUrl: String(background.imageUrl || '').slice(0, 500),
+      blur: Number(background.blur) || 0
     };
   }
+  if (effects !== undefined) users[idx].profile.effects = String(effects).slice(0, 20);
   if (links !== undefined && Array.isArray(links)) {
     users[idx].profile.links = links.slice(0, 10).map(l => ({
       platform: String(l.platform || 'website'),
