@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile — Slezzi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script id="profile-data" type="application/json">__PROFILE_DATA__</script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #07070d;
+      --card-bg: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.1);
+      --text: #fff;
+      --muted: rgba(255,255,255,0.55);
+      --radius: 22px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 48px 16px 80px;
+      position: relative; overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(168,85,247,0.5); border-radius: 3px; }
+
+    /* cursor glow */
+    #cursor-glow {
+      position: fixed; pointer-events: none; z-index: 9999;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s;
+    }
+
+    /* bg */
+    .bg-grad {
+      position: fixed; inset: 0; z-index: 0;
+      transition: background 0.6s ease;
+    }
+    .bg-grad::after {
+      content: ''; position: absolute; inset: 0;
+      background: rgba(0,0,0,0.42);
+    }
+    #particles-canvas {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    }
+
+    .profile-container {
+      position: relative; z-index: 2;
+      width: 100%; max-width: 460px;
+      display: flex; flex-direction: column;
+      gap: 14px; align-items: center;
+    }
+
+    /* ── MAIN PROFILE CARD ── */
+    .profile-card {
+      width: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(20px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* gradient header area */
+    .card-header {
+      height: 110px;
+      position: relative;
+      transition: background 0.4s ease;
+    }
+
+    /* views */
+    .views-badge {
+      position: absolute; top: 12px; left: 14px;
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: rgba(255,255,255,0.7);
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(10px);
+      padding: 4px 10px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .views-badge svg { width: 12px; height: 12px; opacity: 0.8; }
+
+    /* avatar */
+    .avatar-wrap {
+      position: absolute;
+      bottom: -46px; left: 50%;
+      transform: translateX(-50%);
+    }
+    .avatar-outer {
+      width: 92px; height: 92px; border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, #a855f7, #3b82f6);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+    .avatar-inner {
+      width: 100%; height: 100%; border-radius: 50%;
+      background: #1a1a2e; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px;
+    }
+    .avatar-inner img { width:100%; height:100%; object-fit:cover; }
+
+    /* card body */
+    .card-body {
+      padding: 56px 24px 28px;
+      text-align: center;
+    }
+    .display-name {
+      font-size: 22px; font-weight: 800;
+      letter-spacing: -0.5px; margin-bottom: 4px;
+    }
+    .username-tag {
+      font-size: 13px; color: var(--muted); margin-bottom: 14px;
+    }
+    .bio {
+      font-size: 14px; color: rgba(255,255,255,0.75);
+      line-height: 1.65; max-width: 320px;
+      margin: 0 auto 20px;
+    }
+
+    /* ── ICON LINKS (round buttons like screenshot) ── */
+    .icon-links {
+      display: flex; flex-wrap: wrap;
+      gap: 10px; justify-content: center;
+      margin-bottom: 4px;
+    }
+    .icon-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      color: white; text-decoration: none;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .icon-btn:hover {
+      background: rgba(255,255,255,0.22);
+      transform: translateY(-3px) scale(1.08);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    /* ── FULL LINK BUTTONS ── */
+    .link-btns { display: flex; flex-direction: column; gap: 9px; width: 100%; margin-top: 14px; }
+    .link-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 18px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 14px;
+      font-size: 14px; font-weight: 500; color: white;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .link-btn:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .link-btn svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; opacity: 0.85; }
+    .link-btn-label { flex: 1; text-align: left; }
+    .link-btn-arrow { opacity: 0.4; flex-shrink: 0; }
+    .link-btn-arrow svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* ── MUSIC CARD ── */
+    .music-card {
+      width: 100%;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(30px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      animation: fadeUp 0.5s ease 0.12s both;
+    }
+    .music-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .music-art {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, #a855f7, #3b82f6);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .music-art svg { width: 20px; height: 20px; fill: white; }
+    .music-art.playing { animation: spinArt 3s linear infinite; }
+    @keyframes spinArt { to { filter: hue-rotate(360deg); } }
+    .music-meta { flex: 1; min-width: 0; }
+    .music-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .music-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .music-bottom { display: flex; align-items: center; gap: 10px; }
+    .m-vol-icon { opacity: 0.5; flex-shrink: 0; }
+    .m-vol-icon svg { width: 14px; height: 14px; fill: white; }
+    .m-progress-wrap { flex: 1; }
+    .m-progress-track {
+      width: 100%; height: 4px;
+      background: rgba(255,255,255,0.15); border-radius: 2px;
+      cursor: pointer; position: relative;
+    }
+    .m-progress-fill {
+      height: 100%; width: 0%; border-radius: 2px;
+      background: linear-gradient(to right, #a855f7, #3b82f6);
+      transition: width 0.1s linear;
+    }
+    .m-progress-thumb {
+      position: absolute; top: 50%; right: 0;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: white; transform: translate(50%,-50%);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .m-progress-track:hover .m-progress-thumb { opacity: 1; }
+    .m-times { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .m-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .m-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    .m-btn svg { width: 12px; height: 12px; fill: currentColor; }
+    .m-btn.play-main {
+      width: 36px; height: 36px;
+      background: white; color: #0a0a0f;
+    }
+    .m-btn:hover { transform: scale(1.1); }
+
+    /* ── FOOTER ── */
+    .slezzi-footer { font-size: 12px; color: rgba(255,255,255,0.25); text-align: center; }
+    .slezzi-footer a { color: rgba(168,85,247,0.6); text-decoration: none; font-weight: 500; }
+    .slezzi-footer a:hover { color: #a855f7; }
+
+    /* 404 */
+    .not-found { text-align:center; padding: 80px 20px; position:relative; z-index:2; }
+    .not-found h1 { font-size: 80px; font-weight: 800; opacity: 0.15; }
+    .not-found p { color: var(--muted); margin-top: 12px; }
+
+    @media (max-width: 500px) {
+      body { padding: 32px 12px 60px; }
+      .card-body { padding: 52px 18px 24px; }
+    }
+  </style>
+</head>
+<body>
+<div id="cursor-glow"></div>
+<div class="bg-grad" id="bgGrad"></div>
+<canvas id="particles-canvas"></canvas>
+<div class="profile-container" id="profileContainer"></div>
+<script src="/js/profile.js"></script>
+</body>
+</html>

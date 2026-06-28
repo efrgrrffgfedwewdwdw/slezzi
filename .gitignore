@@ -1,0 +1,5 @@
+node_modules/
+ssl/key.pem
+ssl/cert.pem
+data/users.json
+.env

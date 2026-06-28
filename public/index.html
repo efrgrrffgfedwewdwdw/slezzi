@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slezzi .Bio — Gestalte deine digitale Präsenz</title>
+  <meta name="description" content="Erstelle deine eigene Bio-Link Seite auf slezzi.bio. Kostenlos, anpassbar, sofort." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #060608;
+      --bg2: #0d0d14;
+      --card: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.08);
+      --purple: #7c6aff;
+      --blue: #3b82f6;
+      --pink: #e879f9;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.55);
+      --radius: 18px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(124,106,255,0.5); border-radius: 3px; }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(6,6,8,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .navbar-logo {
+      font-size: 22px; font-weight: 800; text-decoration: none; color: white;
+      display: flex; align-items: center; gap: 6px; letter-spacing: -0.5px;
+    }
+    .navbar-logo .dot-bio { color: var(--purple); }
+    .navbar-links { display: flex; align-items: center; gap: 8px; }
+    .navbar-links a {
+      color: var(--muted); text-decoration: none; font-size: 14px;
+      font-weight: 500; padding: 7px 14px; border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .navbar-links a:hover { color: white; background: rgba(255,255,255,0.07); }
+    .navbar-links .btn-nav {
+      background: var(--purple); color: white; border-radius: 10px;
+      padding: 8px 18px;
+    }
+    .navbar-links .btn-nav:hover { background: #6d5cf0; color: white; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 100px 20px 60px;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,106,255,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 60% 40% at 20% 80%, rgba(59,130,246,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 40% at 80% 70%, rgba(232,121,249,0.10) 0%, transparent 60%);
+    }
+    #hero-canvas {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.5;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 800px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(124,106,255,0.15); border: 1px solid rgba(124,106,255,0.3);
+      color: #a89bff; font-size: 13px; font-weight: 500;
+      padding: 6px 16px; border-radius: 100px; margin-bottom: 32px;
+    }
+    .hero-badge::before { content: '✦'; }
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 88px);
+      font-weight: 900; line-height: 1.0; letter-spacing: -3px;
+      margin-bottom: 24px;
+    }
+    .hero h1 .brand { color: var(--purple); }
+    .hero h1 .brand-bio { color: white; }
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px); color: var(--muted);
+      line-height: 1.6; max-width: 560px; margin: 0 auto 40px;
+    }
+
+    /* hero claim input */
+    .hero-claim {
+      display: flex; align-items: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px; overflow: hidden;
+      max-width: 480px; width: 100%; margin: 0 auto 48px;
+      transition: border-color 0.2s;
+    }
+    .hero-claim:focus-within { border-color: var(--purple); }
+    .hero-claim-prefix {
+      padding: 0 0 0 18px; color: var(--muted);
+      font-size: 15px; font-weight: 500; white-space: nowrap;
+    }
+    .hero-claim input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: white; font-size: 15px; padding: 15px 12px;
+      font-family: inherit;
+    }
+    .hero-claim input::placeholder { color: rgba(255,255,255,0.3); }
+    .hero-claim-btn {
+      background: var(--purple); border: none; cursor: pointer;
+      color: white; font-size: 14px; font-weight: 600;
+      padding: 0 22px; height: 52px; white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .hero-claim-btn:hover { background: #6d5cf0; }
+
+    .hero-stats {
+      display: flex; gap: 40px; justify-content: center;
+      flex-wrap: wrap;
+    }
+    .stat-num {
+      font-size: 28px; font-weight: 800;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-lbl { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    /* ── FLOATING PROFILE CARDS (hero sides) ── */
+    .hero-previews {
+      position: absolute; inset: 0; z-index: 1;
+      pointer-events: none; overflow: hidden;
+    }
+    .preview-card {
+      position: absolute; width: 220px;
+      background: rgba(15,15,25,0.9);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      padding: 20px 16px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+      animation: floatCard 6s ease-in-out infinite;
+    }
+    .preview-card.left {
+      left: 3%; top: 50%; transform: translateY(-50%) perspective(800px) rotateY(12deg);
+    }
+    .preview-card.right {
+      right: 3%; top: 50%; transform: translateY(-50%) perspective(800px) rotateY(-12deg);
+      animation-delay: -3s;
+    }
+    @keyframes floatCard {
+      0%,100% { transform: translateY(-50%) perspective(800px) rotateY(12deg) translateY(0px); }
+      50%      { transform: translateY(-50%) perspective(800px) rotateY(12deg) translateY(-14px); }
+    }
+    .preview-card.right { animation-name: floatCardR; }
+    @keyframes floatCardR {
+      0%,100% { transform: translateY(-50%) perspective(800px) rotateY(-12deg) translateY(0px); }
+      50%      { transform: translateY(-50%) perspective(800px) rotateY(-12deg) translateY(-14px); }
+    }
+    .pc-header {
+      height: 70px; border-radius: 14px; margin-bottom: 12px;
+      display: flex; align-items: flex-end; padding: 10px;
+    }
+    .pc-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; background: rgba(0,0,0,0.3);
+    }
+    .pc-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .pc-user { font-size: 11px; color: var(--muted); }
+    .pc-link {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.07); border-radius: 10px;
+      padding: 8px 10px; margin-bottom: 6px; font-size: 12px;
+    }
+    .pc-music {
+      background: rgba(0,0,0,0.4); border-radius: 12px;
+      padding: 10px; margin-top: 8px;
+      display: flex; align-items: center; gap: 8px; font-size: 11px;
+    }
+    .pc-play {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: white; color: black;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; flex-shrink: 0;
+    }
+    .pc-prog { flex:1; height:3px; background:rgba(255,255,255,0.15); border-radius:2px; }
+    .pc-prog-fill { height:100%; width:40%; background:var(--purple); border-radius:2px; }
+
+    /* ── SECTIONS ── */
+    section { padding: 100px 40px; }
+    .section-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--purple); margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(32px, 5vw, 52px); font-weight: 800;
+      letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px; color: var(--muted); max-width: 520px; line-height: 1.7;
+    }
+    .section-center { text-align: center; }
+    .section-center .section-sub { margin: 0 auto; }
+
+    /* ── FEATURES GRID ── */
+    .features-wrap { max-width: 1100px; margin: 0 auto; }
+    .features-top { margin-bottom: 60px; }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+    }
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px 26px;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+    .feat-card:hover {
+      border-color: rgba(124,106,255,0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(124,106,255,0.12);
+    }
+    .feat-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(124,106,255,0.2), rgba(59,130,246,0.2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 18px;
+      border: 1px solid rgba(124,106,255,0.2);
+    }
+    .feat-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .feat-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── HOW IT WORKS ── */
+    .how-wrap { max-width: 1100px; margin: 0 auto; }
+    .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 60px; }
+    .step-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px 28px; position: relative;
+      overflow: hidden;
+    }
+    .step-card::before {
+      content: attr(data-step);
+      position: absolute; top: -10px; right: 20px;
+      font-size: 80px; font-weight: 900; opacity: 0.04; color: white;
+      line-height: 1;
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; margin-bottom: 20px;
+    }
+    .step-title { font-size: 19px; font-weight: 700; margin-bottom: 10px; }
+    .step-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+    /* ── PROFILE SHOWCASE ── */
+    .showcase-wrap { max-width: 1100px; margin: 0 auto; }
+    .showcase-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 60px;
+    }
+    .showcase-card {
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .showcase-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+    .sc-header {
+      height: 100px; display: flex; align-items: flex-end; padding: 14px 16px;
+    }
+    .sc-body { background: #0d0d16; padding: 16px; }
+    .sc-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; background: rgba(0,0,0,0.3); margin-bottom: 10px;
+    }
+    .sc-name { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+    .sc-user { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .sc-bio { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.5; margin-bottom: 12px; }
+    .sc-links { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sc-link {
+      background: rgba(255,255,255,0.07); border-radius: 8px;
+      padding: 5px 10px; font-size: 12px; color: rgba(255,255,255,0.7);
+    }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      text-align: center; padding: 120px 40px;
+      background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(124,106,255,0.12) 0%, transparent 70%);
+    }
+    .cta-section .section-title { font-size: clamp(36px,6vw,64px); }
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white; text-decoration: none;
+      font-size: 17px; font-weight: 700; padding: 18px 44px;
+      border-radius: 14px; margin-top: 36px;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 8px 40px rgba(124,106,255,0.4);
+    }
+    .cta-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    .cta-note { margin-top: 16px; font-size: 13px; color: var(--muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+      color: var(--muted); font-size: 14px;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: white; }
+    .footer-logo { font-weight: 800; font-size: 18px; color: white; }
+    .footer-logo span { color: var(--purple); }
+    .footer-links { display: flex; gap: 24px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .preview-card { display: none; }
+      .features-grid, .steps-grid, .showcase-grid { grid-template-columns: 1fr 1fr; }
+      section { padding: 70px 24px; }
+      .navbar { padding: 0 20px; }
+    }
+    @media (max-width: 600px) {
+      .features-grid, .steps-grid, .showcase-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; align-items: flex-start; }
+      .hero h1 { letter-spacing: -2px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-logo" href="/">Slezzi<span class="dot-bio">.bio</span></a>
+  <div class="navbar-links">
+    <a href="/login">Login</a>
+    <a href="/register" class="btn-nav">Registrieren</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <canvas id="hero-canvas"></canvas>
+
+  <!-- Floating profile cards left & right -->
+  <div class="hero-previews">
+    <div class="preview-card left">
+      <div class="pc-header" style="background:linear-gradient(135deg,#7c6aff,#3b82f6);">
+        <div class="pc-avatar">🦊</div>
+      </div>
+      <div class="pc-name">Alex Rivera</div>
+      <div class="pc-user">@alexrivera · 1.2k views</div>
+      <div style="margin-top:10px;">
+        <div class="pc-link">💻 <span>GitHub</span></div>
+        <div class="pc-link">🐦 <span>Twitter</span></div>
+        <div class="pc-link">🌐 <span>Portfolio</span></div>
+      </div>
+      <div class="pc-music">
+        <div class="pc-play">▶</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Lofi Beats Mix</div>
+          <div class="pc-prog"><div class="pc-prog-fill"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-card right">
+      <div class="pc-header" style="background:linear-gradient(135deg,#06b6d4,#10b981);">
+        <div class="pc-avatar">🎮</div>
+      </div>
+      <div class="pc-name">Max Stream</div>
+      <div class="pc-user">@maxstream · 3.8k views</div>
+      <div style="margin-top:10px;">
+        <div class="pc-link">🟣 <span>Twitch</span></div>
+        <div class="pc-link">▶️ <span>YouTube</span></div>
+        <div class="pc-link">🎮 <span>Discord</span></div>
+      </div>
+      <div class="pc-music">
+        <div class="pc-play">⏸</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Phonk Racing Vol.3</div>
+          <div class="pc-prog"><div class="pc-prog-fill" style="width:65%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">Kostenlos für immer · Kein Kreditkarte nötig</div>
+    <h1><span class="brand">Slezzi</span> <span class="brand-bio">.Bio</span><br>Deine digitale Präsenz<br><span style="color:var(--purple)">einfach gestalten.</span></h1>
+    <p class="hero-sub">Erstelle in Sekunden deine eigene Profilseite. Teile alle deine Links, Social Media & Musik — auf einer einzigen, wunderschönen Seite.</p>
+
+    <form class="hero-claim" onsubmit="claimUsername(event)">
+      <span class="hero-claim-prefix">slezzi.bio/</span>
+      <input type="text" id="heroUsername" placeholder="deinname" maxlength="20" autocomplete="off" />
+      <button type="submit" class="hero-claim-btn">Link beanspruchen →</button>
+    </form>
+
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">10K+</div>
+        <div class="stat-lbl">Profile erstellt</div>
+      </div>
+      <div>
+        <div class="stat-num">50K+</div>
+        <div class="stat-lbl">Monatliche Aufrufe</div>
+      </div>
+      <div>
+        <div class="stat-num">100%</div>
+        <div class="stat-lbl">Kostenlos</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section>
+  <div class="features-wrap">
+    <div class="features-top">
+      <div class="section-label">Funktionen</div>
+      <h2 class="section-title">Alles was du brauchst</h2>
+      <p class="section-sub">Mächtige Features um dein Profil einzigartig zu machen.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🎨</div>
+        <div class="feat-title">Custom Gradient</div>
+        <div class="feat-desc">Wähle zwei Farben und eine Richtung für deinen einzigartigen Hintergrund-Gradient.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔗</div>
+        <div class="feat-title">Social Links</div>
+        <div class="feat-desc">Füge bis zu 10 Links hinzu — Discord, Twitter, GitHub, Instagram, TikTok und mehr.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎵</div>
+        <div class="feat-title">Musik Player</div>
+        <div class="feat-desc">Bette einen eigenen Soundtrack ein mit einem eingebauten, schicken Musikplayer.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Profil-Aufrufe</div>
+        <div class="feat-desc">Sieh wie viele Menschen dein Profil besucht haben — mit eingebautem View-Counter.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Sofort fertig</div>
+        <div class="feat-desc">Profil in unter einer Minute erstellen — kein Code, kein Design-Know-how nötig.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📱</div>
+        <div class="feat-title">Mobile First</div>
+        <div class="feat-desc">Dein Profil sieht auf jedem Gerät, jeder Bildschirmgröße und jedem Browser perfekt aus.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🌈</div>
+        <div class="feat-title">Live Vorschau</div>
+        <div class="feat-desc">Sieh Änderungen sofort — das Dashboard zeigt dir dein Profil in Echtzeit während du bearbeitest.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔒</div>
+        <div class="feat-title">Sicher & Privat</div>
+        <div class="feat-desc">Deine Daten sind sicher. Passwörter verschlüsselt, HTTPS überall, JWT-Authentifizierung.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">✨</div>
+        <div class="feat-title">Partikel-Effekte</div>
+        <div class="feat-desc">Dein öffentliches Profil hat animierte Partikel im Hintergrund — sieht einfach gut aus.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="background: var(--bg2);">
+  <div class="how-wrap">
+    <div class="section-center">
+      <div class="section-label">So funktioniert's</div>
+      <h2 class="section-title">In 3 Schritten online</h2>
+      <p class="section-sub section-center" style="margin:0 auto;">Kein kompliziertes Setup. Einfach registrieren und loslegen.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card" data-step="1">
+        <div class="step-num">1</div>
+        <div class="step-title">Account erstellen</div>
+        <div class="step-desc">Registriere dich kostenlos mit einem Benutzernamen, E-Mail und Passwort. Dauert 30 Sekunden.</div>
+      </div>
+      <div class="step-card" data-step="2">
+        <div class="step-num">2</div>
+        <div class="step-title">Profil anpassen</div>
+        <div class="step-desc">Füge dein Avatar, Bio, Social Links und Musik hinzu. Alles mit Live-Vorschau im Dashboard.</div>
+      </div>
+      <div class="step-card" data-step="3">
+        <div class="step-num">3</div>
+        <div class="step-title">Link teilen</div>
+        <div class="step-desc">Dein Profil ist sofort live unter slezzi.bio/deinname. Teile den Link überall!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFILE SHOWCASE -->
+<section>
+  <div class="showcase-wrap">
+    <div class="section-center">
+      <div class="section-label">Beispiel Profile</div>
+      <h2 class="section-title">Schön von Anfang an</h2>
+      <p class="section-sub" style="margin:0 auto;">Jedes Profil ist vollständig anpassbar — mit Gradient, Links und Musik.</p>
+    </div>
+    <div class="showcase-grid">
+      <div class="showcase-card">
+        <div class="sc-header" style="background:linear-gradient(135deg,#7c6aff,#3b82f6);"></div>
+        <div class="sc-body">
+          <div class="sc-avatar">🦊</div>
+          <div class="sc-name">Alex Rivera</div>
+          <div class="sc-user">@alexrivera</div>
+          <div class="sc-bio">Developer & Designer · Building cool things 🚀</div>
+          <div class="sc-links">
+            <span class="sc-link">💻 GitHub</span>
+            <span class="sc-link">🐦 Twitter</span>
+            <span class="sc-link">🌐 Website</span>
+          </div>
+        </div>
+      </div>
+      <div class="showcase-card">
+        <div class="sc-header" style="background:linear-gradient(135deg,#f43f5e,#f97316);"></div>
+        <div class="sc-body">
+          <div class="sc-avatar">🎨</div>
+          <div class="sc-name">Luna Chen</div>
+          <div class="sc-user">@lunachen</div>
+          <div class="sc-bio">Digital Artist · Illustratorin · Coffee ☕</div>
+          <div class="sc-links">
+            <span class="sc-link">📸 Instagram</span>
+            <span class="sc-link">🎵 TikTok</span>
+            <span class="sc-link">▶️ YouTube</span>
+          </div>
+        </div>
+      </div>
+      <div class="showcase-card">
+        <div class="sc-header" style="background:linear-gradient(135deg,#06b6d4,#10b981);"></div>
+        <div class="sc-body">
+          <div class="sc-avatar">🎮</div>
+          <div class="sc-name">Max Stream</div>
+          <div class="sc-user">@maxstream</div>
+          <div class="sc-bio">Full-time Streamer · Gaming · Just vibing 🎮</div>
+          <div class="sc-links">
+            <span class="sc-link">🟣 Twitch</span>
+            <span class="sc-link">▶️ YouTube</span>
+            <span class="sc-link">🎮 Discord</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-label">Kostenlos starten</div>
+  <h2 class="section-title">Bereit dich abzuheben?</h2>
+  <p class="section-sub" style="margin:0 auto;margin-top:12px;">Tausende Nutzer haben bereits ihre eigene Slezzi.bio Seite. Bist du dabei?</p>
+  <br>
+  <a href="/register" class="cta-btn">Jetzt kostenlos starten →</a>
+  <div class="cta-note">Keine Kreditkarte · Keine Tricks · Für immer kostenlos</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Slezzi<span>.bio</span></div>
+  <div class="footer-links">
+    <a href="/register">Registrieren</a>
+    <a href="/login">Login</a>
+  </div>
+  <div style="color:var(--muted);font-size:13px;">Made with ❤️ · slezzi.bio</div>
+</footer>
+
+<script>
+  // ── Hero canvas particles ──
+  (function() {
+    const canvas = document.getElementById('hero-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    for (let i = 0; i < 60; i++) particles.push({
+      x: Math.random()*1920, y: Math.random()*1080,
+      vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3-.1,
+      r: Math.random()*1.5+.5, o: Math.random()*.4+.1
+    });
+    function loop() {
+      ctx.clearRect(0,0,W,H);
+      particles.forEach(p => {
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.y<-5) p.y=H; if(p.x<-5) p.x=W; if(p.x>W+5) p.x=0;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(255,255,255,${p.o})`; ctx.fill();
+      });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  // ── Cursor glow effect ──
+  (function() {
+    const glow = document.createElement('div');
+    glow.style.cssText = `position:fixed;pointer-events:none;z-index:9999;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(124,106,255,0.1) 0%,transparent 70%);transform:translate(-50%,-50%);transition:left 0.08s ease,top 0.08s ease;left:-999px;top:-999px;`;
+    document.body.appendChild(glow);
+    document.addEventListener('mousemove', e => {
+      glow.style.left = e.clientX + 'px';
+      glow.style.top  = e.clientY + 'px';
+    });
+  })();
+
+  // ── Claim username redirect ──
+  function claimUsername(e) {
+    e.preventDefault();
+    const val = document.getElementById('heroUsername').value.trim();
+    if (val) {
+      window.location.href = `/register?username=${encodeURIComponent(val)}`;
+    } else {
+      window.location.href = '/register';
+    }
+  }
+</script>
+</body>
+</html>

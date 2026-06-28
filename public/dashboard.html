@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Slezzi</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-logo" href="/">✦ Slezzi</a>
+  <div class="navbar-links">
+    <a href="#" id="viewProfileLink" target="_blank">View profile ↗</a>
+    <button class="btn btn-ghost" id="logoutBtn" style="padding:8px 16px;font-size:14px;">Sign out</button>
+  </div>
+</nav>
+
+<div class="dashboard-layout">
+  <!-- Editor panel -->
+  <div class="dashboard-sidebar" id="editorPanel">
+
+    <div class="section-header">Avatar</div>
+    <div class="avatar-upload">
+      <div class="avatar-preview" id="avatarPreviewSmall">
+        <span id="avatarEmoji">🙂</span>
+      </div>
+      <div style="flex:1">
+        <div class="form-group" style="margin-bottom:0">
+          <input type="url" id="avatarUrl" placeholder="https://example.com/avatar.jpg" />
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">Paste an image URL for your avatar</div>
+      </div>
+    </div>
+
+    <div class="section-header">Profile Info</div>
+    <div class="form-group">
+      <label>Display Name</label>
+      <input type="text" id="displayName" placeholder="Your Name" maxlength="50" />
+    </div>
+    <div class="form-group">
+      <label>Bio <span class="char-count" id="bioCount">0/150</span></label>
+      <textarea id="bio" placeholder="Tell the world about yourself..." maxlength="150" rows="3"></textarea>
+    </div>
+
+    <div class="section-header">Background Gradient</div>
+    <div class="input-row">
+      <div class="form-group">
+        <label>Color 1</label>
+        <div class="color-input-group">
+          <input type="color" id="bgColor1" value="#a855f7" />
+          <input type="text" id="bgColor1Text" value="#a855f7" maxlength="7" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Color 2</label>
+        <div class="color-input-group">
+          <input type="color" id="bgColor2" value="#3b82f6" />
+          <input type="text" id="bgColor2Text" value="#3b82f6" maxlength="7" />
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Direction</label>
+      <select id="bgDirection">
+        <option value="135deg">↗ Diagonal (default)</option>
+        <option value="to bottom">↓ Top to Bottom</option>
+        <option value="to right">→ Left to Right</option>
+        <option value="to top right">↗ Top Right</option>
+        <option value="to bottom right">↘ Bottom Right</option>
+        <option value="225deg">↙ Diagonal reverse</option>
+      </select>
+    </div>
+
+    <div class="section-header">Social Links</div>
+    <div class="links-list" id="linksList"></div>
+    <button class="btn btn-ghost" id="addLinkBtn" style="width:100%;justify-content:center;font-size:14px;" onclick="addLink()">
+      + Add Link
+    </button>
+
+    <div class="section-header">Music Player</div>
+    <div class="form-group">
+      <label>Song Title</label>
+      <input type="text" id="musicTitle" placeholder="My Favorite Song" maxlength="100" />
+    </div>
+    <div class="form-group">
+      <label>Audio URL</label>
+      <input type="url" id="musicUrl" placeholder="https://example.com/song.mp3" />
+    </div>
+
+    <!-- Bottom padding so save bar doesn't overlap last field -->
+    <div style="height: 80px;"></div>
+  </div>
+
+  <!-- Preview panel -->
+  <div class="dashboard-preview">
+    <div class="preview-label">Live Preview</div>
+    <div class="preview-frame" id="previewFrame">
+      <div class="profile-preview-card" id="previewCard">
+        <div class="preview-views" id="previewViews">👁 0 views</div>
+        <div class="preview-avatar" id="previewAvatar"><span>🙂</span></div>
+        <div class="preview-name" id="previewName">Your Name</div>
+        <div class="preview-username" id="previewUsername">@username</div>
+        <div class="preview-bio" id="previewBio"></div>
+        <div class="preview-links" id="previewLinks"></div>
+        <div class="preview-music-card" id="previewMusic" style="display:none;">
+          <div class="music-title-row">
+            <span class="music-icon">🎵</span>
+            <span class="music-song-title" id="previewMusicTitle">Song Title</span>
+          </div>
+          <div class="music-controls">
+            <button class="music-btn play-btn" id="previewPlayBtn" onclick="toggleMusicPreview()">▶</button>
+            <div class="music-progress-wrap">
+              <div class="music-progress-bar">
+                <div class="music-progress-fill" id="previewProgressFill"></div>
+              </div>
+              <div class="music-time" id="previewMusicTime">0:00 / 0:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Save bar -->
+<div class="save-bar">
+  <div class="profile-url">
+    Your profile: <a href="#" id="profileUrlLink" target="_blank"></a>
+  </div>
+  <div class="save-actions">
+    <button class="btn btn-ghost" onclick="window.open(profileUrl, '_blank')">Preview ↗</button>
+    <button class="btn btn-primary" id="saveBtn" onclick="saveProfile()">Save changes</button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<audio id="previewAudio" style="display:none;"></audio>
+
+<script src="/js/app.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

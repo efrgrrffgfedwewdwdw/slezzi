@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — Slezzi</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo gradient-text">✦ Slezzi</div>
+    <div class="auth-subtitle">Create your free profile page</div>
+
+    <form id="registerForm" novalidate>
+      <div class="form-group">
+        <label for="username">Username <span style="color:var(--text-secondary);font-size:12px;">(used in your URL)</span></label>
+        <input type="text" id="username" name="username" placeholder="cooluser123" autocomplete="username" required />
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:5px;">
+          Your profile: <span id="urlPreview" style="color:var(--purple);">slezzi.bio/your_username</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Password <span style="color:var(--text-secondary);font-size:12px;">(min 6 chars)</span></label>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password" required />
+      </div>
+      <div class="form-error" id="registerError"></div>
+      <button type="submit" class="btn btn-primary" id="registerBtn" style="width:100%; justify-content:center; margin-top:8px;">
+        Create free account
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="/login">Sign in</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/app.js"></script>
+<script>
+  // Redirect if already logged in
+  if (localStorage.getItem('bl_token')) {
+    window.location.href = '/dashboard';
+  }
+
+  const usernameInput = document.getElementById('username');
+  const urlPreview = document.getElementById('urlPreview');
+  const form = document.getElementById('registerForm');
+  const errorEl = document.getElementById('registerError');
+  const registerBtn = document.getElementById('registerBtn');
+
+  // Pre-fill username from landing page claim input
+  const urlParams = new URLSearchParams(window.location.search);
+  const preUsername = urlParams.get('username');
+  if (preUsername) {
+    usernameInput.value = preUsername;
+    urlPreview.textContent = `slezzi.bio/${preUsername}`;
+  }
+
+  usernameInput.addEventListener('input', () => {
+    const val = usernameInput.value.trim() || 'your_username';
+    urlPreview.textContent = `slezzi.bio/${val}`;
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.classList.remove('visible');
+
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (password.length < 6) {
+      errorEl.textContent = 'Password must be at least 6 characters';
+      errorEl.classList.add('visible');
+      return;
+    }
+
+    registerBtn.disabled = true;
+    registerBtn.innerHTML = '<span class="spinner"></span> Creating account...';
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Registration failed');
+      localStorage.setItem('bl_token', data.token);
+      localStorage.setItem('bl_username', data.username);
+      window.location.href = '/dashboard';
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.classList.add('visible');
+      registerBtn.disabled = false;
+      registerBtn.innerHTML = 'Create free account';
+    }
+  });
+</script>
+</body>
+</html>
+
