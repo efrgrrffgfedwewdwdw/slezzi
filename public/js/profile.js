@@ -4,7 +4,7 @@ const SVG={discord:`<svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791
 const ICON_PLATFORMS=new Set(['discord','twitter','github','instagram','tiktok','youtube','twitch','steam','spotify']);
 let profileData=null;
 try{profileData=JSON.parse(document.getElementById('profile-data').textContent);}catch(e){showNotFound();}
-if(profileData){renderProfile(profileData);initCursor();}
+if(profileData){try{renderProfile(profileData);}catch(e){console.error('Profile render error:',e);showNotFound();}initCursor();}
 
 let muted=false;
 function toggleMute(){
@@ -24,6 +24,7 @@ function renderProfile(data){
   if(bgEl){if(coverUrl){bgEl.style.backgroundImage=`url(${esc(coverUrl)})`;bgEl.style.background='';}else{bgEl.style.background=`linear-gradient(${dir},${c1},${c2})`;bgEl.style.backgroundImage='';}}
   initEffect(p.effects||'particles',c1,c2);
   const lc=document.getElementById('left-col');
+  if(!lc){console.error('left-col not found');return;}
 
   // ── Big Avatar + Animated Name Layout (guns.lol style) ──
   const ring=p.avatarRing||'ring-gradient';
@@ -73,7 +74,9 @@ function renderProfile(data){
   const d=p.discord;
   if(d&&(d.username||d.inviteUrl)){
     const pill=document.createElement('div');pill.className='discord-pill';
-    const defAv=d.userId?`https://cdn.discordapp.com/embed/avatars/${Number(BigInt(d.userId)%5n)}.png`:'https://cdn.discordapp.com/embed/avatars/0.png';
+    const defAv=d.userId
+      ? `https://cdn.discordapp.com/embed/avatars/${(parseInt(d.userId,10)||0) % 5}.png`
+      : 'https://cdn.discordapp.com/embed/avatars/0.png';
     pill.innerHTML=`
       <div class="dc-avatar">
         <img id="dcAvatar" src="${esc(defAv)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
