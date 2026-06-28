@@ -5,19 +5,13 @@ const { v4: uuidv4 } = require('uuid');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
-const http = require('http');
 
 const app = express();
-const PORT_HTTPS = process.env.PORT || 443;
-const PORT_HTTP  = 80;
+// Render.com sets PORT env variable — always use it
+const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'slezzi-secret-key-change-in-production';
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 const PROFILE_TEMPLATE = path.join(__dirname, 'views', 'profile.html');
-
-// SSL certificate paths — place your cert files here or use the self-signed ones
-const SSL_KEY  = path.join(__dirname, 'ssl', 'key.pem');
-const SSL_CERT = path.join(__dirname, 'ssl', 'cert.pem');
 
 // Middleware
 app.use(cors());
@@ -95,6 +89,7 @@ app.post('/api/register', async (req, res) => {
       background: { color1: '#a855f7', color2: '#3b82f6', direction: '135deg' },
       links: [],
       music: { title: '', url: '' },
+      discord: { username: '', userId: '', serverId: '', serverName: '', inviteUrl: '' },
       views: 0
     }
   };
@@ -178,6 +173,15 @@ app.put('/api/profile', authMiddleware, (req, res) => {
       url: String(music.url || '').slice(0, 500)
     };
   }
+  if (req.body.discord !== undefined) {
+    users[idx].profile.discord = {
+      username: String(req.body.discord.username || '').slice(0, 50),
+      userId:   String(req.body.discord.userId   || '').slice(0, 30),
+      serverId: String(req.body.discord.serverId || '').slice(0, 30),
+      serverName: String(req.body.discord.serverName || '').slice(0, 80),
+      inviteUrl:  String(req.body.discord.inviteUrl  || '').slice(0, 200)
+    };
+  }
 
   writeUsers(users);
   const { passwordHash, ...safe } = users[idx];
@@ -227,41 +231,8 @@ app.get('/:username', (req, res) => {
   res.send(html);
 });
 
-// ── HTTPS / HTTP setup ──────────────────────────────────────────────────────
-
-// Redirect all HTTP traffic to HTTPS
-const httpApp = express();
-httpApp.use((req, res) => {
-  const host = req.headers.host ? req.headers.host.replace(/:\d+$/, '') : 'localhost';
-  const httpsPort = PORT_HTTPS === 443 ? '' : `:${PORT_HTTPS}`;
-  res.redirect(301, `https://${host}${httpsPort}${req.url}`);
+// Start server — works on Render.com and locally
+app.listen(PORT, () => {
+  console.log(`✦ Slezzi running on port ${PORT}`);
+  console.log(`  Local: http://localhost:${PORT}`);
 });
-
-if (fs.existsSync(SSL_KEY) && fs.existsSync(SSL_CERT)) {
-  // Production / self-signed mode — start real HTTPS server
-  const sslOptions = {
-    key:  fs.readFileSync(SSL_KEY),
-    cert: fs.readFileSync(SSL_CERT)
-  };
-
-  https.createServer(sslOptions, app).listen(PORT_HTTPS, () => {
-    console.log(`✦ Slezzi running at https://localhost:${PORT_HTTPS}`);
-  });
-
-  // Also start HTTP redirect server (skip on restricted ports in dev)
-  try {
-    http.createServer(httpApp).listen(PORT_HTTP, () => {
-      console.log(`  HTTP  → redirecting to HTTPS`);
-    });
-  } catch (e) {
-    // Port 80 may require admin rights — ignore in dev
-  }
-} else {
-  // No SSL certs found — fall back to HTTP with a warning
-  const DEV_PORT = 3000;
-  app.listen(DEV_PORT, () => {
-    console.log(`⚠  SSL certs not found in /ssl — running HTTP fallback`);
-    console.log(`   Run  node generate-cert.js  to create self-signed certs`);
-    console.log(`✦ Slezzi running at http://localhost:${DEV_PORT}`);
-  });
-}

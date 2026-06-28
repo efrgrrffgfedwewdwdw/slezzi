@@ -26,6 +26,7 @@ let profileState = {
   background: { color1: '#a855f7', color2: '#3b82f6', direction: '135deg' },
   links: [],
   music: { title: '', url: '' },
+  discord: { username: '', userId: '', serverId: '', serverName: '', inviteUrl: '' },
   views: 0
 };
 
@@ -73,6 +74,13 @@ async function loadProfile() {
   document.getElementById('musicTitle').value = profileState.music?.title || '';
   document.getElementById('musicUrl').value = profileState.music?.url || '';
 
+  // Discord fields
+  const d = profileState.discord || {};
+  document.getElementById('discordUsername').value = d.username || '';
+  document.getElementById('discordUserId').value = d.userId || '';
+  document.getElementById('discordServerName').value = d.serverName || '';
+  document.getElementById('discordInviteUrl').value = d.inviteUrl || '';
+
   updateBioCount();
   renderLinks();
   updatePreview();
@@ -86,7 +94,8 @@ function updateBioCount() {
 }
 
 // Live preview updates on any input change
-['displayName', 'bio', 'avatarUrl', 'bgColor1', 'bgColor2', 'bgDirection', 'musicTitle', 'musicUrl'].forEach(id => {
+['displayName', 'bio', 'avatarUrl', 'bgColor1', 'bgColor2', 'bgDirection', 'musicTitle', 'musicUrl',
+ 'discordUsername', 'discordUserId', 'discordServerName', 'discordInviteUrl'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', collectAndPreview);
 });
@@ -123,6 +132,12 @@ function collectAndPreview() {
   profileState.music = {
     title: document.getElementById('musicTitle').value.trim(),
     url: document.getElementById('musicUrl').value.trim()
+  };
+  profileState.discord = {
+    username:   document.getElementById('discordUsername').value.trim(),
+    userId:     document.getElementById('discordUserId').value.trim(),
+    serverName: document.getElementById('discordServerName').value.trim(),
+    inviteUrl:  document.getElementById('discordInviteUrl').value.trim()
   };
   updatePreview();
 }
@@ -287,7 +302,8 @@ async function saveProfile() {
     avatarUrl: profileState.avatarUrl,
     background: profileState.background,
     links: profileState.links,
-    music: profileState.music
+    music: profileState.music,
+    discord: profileState.discord
   };
 
   try {

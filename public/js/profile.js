@@ -94,6 +94,36 @@ function renderProfile(data) {
   `;
   container.appendChild(card);
 
+  // ── Discord card ──
+  const d = p.discord;
+  if (d && (d.username || d.inviteUrl)) {
+    const dc = document.createElement('div');
+    dc.className = 'discord-card';
+    const avatarUrl = d.userId
+      ? `https://cdn.discordapp.com/avatars/${d.userId}/avatar.png`
+      : '';
+    dc.innerHTML = `
+      <div class="dc-left">
+        <div class="dc-avatar">
+          ${avatarUrl
+            ? `<img src="${esc(avatarUrl)}" onerror="this.outerHTML='<span style=font-size:22px>💬</span>'" />`
+            : `<span style="font-size:22px">💬</span>`}
+          <div class="dc-status"></div>
+        </div>
+        <div class="dc-info">
+          <div class="dc-name">${esc(d.username || 'Discord')}</div>
+          ${d.serverName ? `<div class="dc-server">${esc(d.serverName)}</div>` : ''}
+        </div>
+      </div>
+      ${d.inviteUrl
+        ? `<a class="dc-btn" href="${esc(d.inviteUrl)}" target="_blank" rel="noopener noreferrer">
+            Hinzufügen &nbsp;→
+           </a>`
+        : ''}
+    `;
+    container.appendChild(dc);
+  }
+
   // ── Music card ──
   if (p.music?.title || p.music?.url) {
     const mc = document.createElement('div');
