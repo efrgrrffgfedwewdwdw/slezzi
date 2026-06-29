@@ -56,8 +56,7 @@ function render(data){
       </div>
       <div class="m-bottom">
         <div class="m-vol" title="Lautstärke">${I.vol}</div>
-        <input type="range" id="volSlider" min="0" max="100" value="80" oninput="setVol(this.value)"
-          style="-webkit-appearance:none;appearance:none;width:80px;height:4px;border-radius:2px;background:linear-gradient(to right,#a855f7 80%,rgba(255,255,255,.2) 80%);outline:none;cursor:pointer;flex-shrink:0;margin:0"/>
+        <div class="vol-wrap"><input type="range" id="volSlider" min="0" max="100" value="80" oninput="setVol(this.value)"/></div>
         <div class="m-prog">
           <div class="m-track" id="mTrack">
             <div class="m-fill" id="mFill"></div>
